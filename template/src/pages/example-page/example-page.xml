@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model href="../../../node_modules/atv-legacy.js/atv.xsd" ?>
+<atv>
+    <head>
+        <script src="/js/example-page.js" />
+    </head>
+    <body>
+        <scroller id="example-page">
+            <items>
+                <textDetail>
+                    <column>
+                        <title>{{json @root}}</title>
+                        {{#each test}}
+                        <textSection>
+                            <title>{{this}}</title>
+                            <badgeLabel>{{this}}</badgeLabel>
+                            {{> example-component}}
+                        </textSection>
+                        {{/each}}
+                    </column>
+                </textDetail>
+            </items>
+        </scroller>
+    </body>
+</atv>

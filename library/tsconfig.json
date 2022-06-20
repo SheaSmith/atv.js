@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "lib": [
+            "ESNEXT"
+        ],
+        "module": "ESNEXT",
+        "rootDir": "./src",
+        "strict": true,
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "outDir": "dist",
+        "declaration": true,
+        "allowJs": true,
+        "paths": {
+            "atv-legacy-q": ["./node_modules/@types/q"]
+        }
+    },
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}

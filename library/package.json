@@ -1,0 +1,30 @@
+{
+  "name": "atv-legacy.js",
+  "version": "0.1.4",
+  "description": "atv-legacy.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "keywords": [],
+  "author": "Shea Smith",
+  "homepage": "https://github.com/SheaSmith/atv.js/",
+  "bugs": {
+    "url": "https://github.com/SheaSmith/atv.js/issues"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@types/atvlegacycontentkit": "^7.7.0",
+    "@types/handlebars": "^4.1.0",
+    "@types/q": "^1.5.5",
+    "atv-legacy-q": "^1.5.2",
+    "handlebars": "^4.7.7"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.15.0",
+    "@typescript-eslint/parser": "^5.15.0",
+    "eslint": "^8.11.0",
+    "typescript": "^4.6.2"
+  }
+}

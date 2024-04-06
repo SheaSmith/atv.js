@@ -1,8 +1,10 @@
-import Handlebars, { HelperOptions } from "handlebars";
 import { Component } from "./component";
 import { generateErrorDialog } from "./error-dialog";
 import Q from 'atv-legacy-q';
 import { HttpResponse } from "./http-service";
+import vento from 'ventojs/esm/mod';
+import {TemplateLoader} from "./template-loader";
+import {Environment} from "ventojs/esm/src/environment";
 
 /**
  * A top-level page that can be loaded directly by the Apple TV.
@@ -41,19 +43,19 @@ export abstract class Page {
 
     /**
      * Load a page by downloading the template and filling in the data.
+     * @param environment The rendering environment to use.
      * @param data The data to use to compile the template.
      */
-    protected renderXml(data?: any) {
+    protected renderXml(environment: Environment, data?: any) {
         // Get the XML template from the url. We want to return a string.
         this.loadTemplateSource()
             .then((templateSource) => {
-                // Compile the template.
-                const template = Handlebars.compile(templateSource);
+
                 // Substitute the data
-                const templateWithData = template(data);
+                const templateWithData = environment.runStringSync(templateSource, data);
                 try {
                     // Parse the XML.
-                    const xml = atv.parseXML(templateWithData);
+                    const xml = atv.parseXML(templateWithData.content);
 
                     // If we have a proxy document, we need to load the XML into that.
                     if (this.proxyDocument != null) {
@@ -128,39 +130,10 @@ export abstract class Page {
      * By default this creates and shows a proxy document, but if the super method isn't called, then it won't be.
      */
     public loadPage(event?: ATVNavigateEvent, useProxyDocument = true, swap = false) {
-        // Register a raw JSON helper
-        Handlebars.registerHelper('json', (context) => {
-            return JSON.stringify(context);
-        });
+        const loader = new TemplateLoader();
+        const env = vento({ includes: loader })
 
-        Handlebars.registerHelper('ifCond', (arg1, arg2, arg3, options: HelperOptions) => {
-            switch (arg2) {
-                case '==':
-                    return (arg1 == arg3) ? options.fn(this) : options.inverse(this);
-                case '===':
-                    return (arg1 === arg3) ? options.fn(this) : options.inverse(this);
-                case '!=':
-                    return (arg1 != arg3) ? options.fn(this) : options.inverse(this);
-                case '!==':
-                    return (arg1 !== arg3) ? options.fn(this) : options.inverse(this);
-                case '<':
-                    return (arg1 < arg3) ? options.fn(this) : options.inverse(this);
-                case '<=':
-                    return (arg1 <= arg3) ? options.fn(this) : options.inverse(this);
-                case '>':
-                    return (arg1 > arg3) ? options.fn(this) : options.inverse(this);
-                case '>=':
-                    return (arg1 >= arg3) ? options.fn(this) : options.inverse(this);
-                case '&&':
-                    return (arg1 && arg3) ? options.fn(this) : options.inverse(this);
-                case '||':
-                    return (arg1 || arg3) ? options.fn(this) : options.inverse(this);
-                default:
-                    return options.inverse(this);
-            }
-        });
-
-        this.registerCustomHelpers(Handlebars);
+        this.registerCustomHelpers(env);
 
         this.swap = swap;
 
@@ -172,16 +145,16 @@ export abstract class Page {
         }
 
         // Load the component templates, if necessary.
-        this.loadComponents()
+        this.loadComponents(loader)
             .then(() => {
                 // Successfully loaded the components, so we can load data.
                 this.loadData()
                     .then(d => {
                         // Successfully got the data, so render the XML.
                         if (d instanceof HttpResponse) {
-                            this.renderXml(d.body);
+                            this.renderXml(env, d.body);
                         } else {
-                            this.renderXml(d);
+                            this.renderXml(env, d);
                         }
                     })
                     .catch((e) => {
@@ -195,20 +168,20 @@ export abstract class Page {
 
     /**
      * Load any subcomponents used by this page.
-     * @returns A promise indicating that all of the components have finished loading.
+     * @returns A promise indicating that all the components have finished loading.
      */
-    protected loadComponents(): Q.Promise<void> {
+    protected loadComponents(templateLoader: TemplateLoader): Q.Promise<void> {
         // Create a new promise.
         const deferred = Q.defer<void>();
-        /// Get all of the promises for the components list.
+        /// Get all the promises for the components list.
         const promises = this.components.map(c => c.loadTemplate());
 
         Q.all(promises)
             .then((c) => {
-                // All of the promises are complete.
+                // All the promises are complete.
                 c.forEach(res => {
                     // Iterate through each of the components and register it in Handlebars.
-                    Handlebars.registerPartial(res.componentKey, res.template);
+                    templateLoader.registerTemplate(res.componentKey, res.template);
                 });
 
                 // Tell the promise we're done.
@@ -255,5 +228,5 @@ export abstract class Page {
     /**
      * Any additional helpers that should be registered by the app.
      */
-    protected registerCustomHelpers(handlebars: typeof Handlebars) {}
+    protected registerCustomHelpers(environment: Environment) {}
 }

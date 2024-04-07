@@ -1,8 +1,8 @@
-import vento from 'ventojs/esm/mod';
 import {TemplateLoader} from "./template-loader";
+import {Environment} from "nunjucks";
 
 export function generateErrorDialog(errorMessage: string, errorDescription: string): atv.Document {
-    const env = vento({ includes: new TemplateLoader() })
+    const env = new Environment(new TemplateLoader());
 
     const template = '<?xml version="1.0" encoding="UTF-8"?>'
         + '<atv><body>'
@@ -11,6 +11,6 @@ export function generateErrorDialog(errorMessage: string, errorDescription: stri
         + '<description>{{description}}</description>'
         + '</dialog>'
         + '</body></atv>';
-    const compiledTemplate = env.runStringSync(template, { message: errorMessage, description: errorDescription });
-    return atv.parseXML(compiledTemplate.content);
+    const compiledTemplate = env.renderString(template, { message: errorMessage, description: errorDescription });
+    return atv.parseXML(compiledTemplate);
 }

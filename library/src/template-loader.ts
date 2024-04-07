@@ -1,20 +1,27 @@
-import {Loader, TemplateSource} from "ventojs/esm/src/loader";
+import {ILoader, Loader, LoaderSource} from "nunjucks";
 
-export class TemplateLoader implements Loader {
+export class TemplateLoader extends Loader implements ILoader {
     private templates = new Map<string, string>();
 
-    load(file: string): TemplateSource {
-        return {
-            source: this.templates.get(file)!
-        }
-    }
 
-    resolve(from: string, file: string): string {
-        return `${from}-${file}`;
+    resolve(from: string, to: string): string {
+        return to;
     }
 
     registerTemplate(templateKey: string, template: string) {
         this.templates.set(templateKey, template);
     }
+
+    async: false | undefined;
+
+    getSource(name: string): LoaderSource {
+        return {
+            src: this.templates.get(name)!,
+            path: name,
+            noCache: false
+        }
+    }
+
+
 
 }

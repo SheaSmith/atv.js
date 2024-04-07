@@ -2,9 +2,8 @@ import { Component } from "./component";
 import { generateErrorDialog } from "./error-dialog";
 import Q from 'atv-legacy-q';
 import { HttpResponse } from "./http-service";
-import vento from 'ventojs/esm/mod';
 import {TemplateLoader} from "./template-loader";
-import {Environment} from "ventojs/esm/src/environment";
+import {Environment} from "nunjucks"
 
 /**
  * A top-level page that can be loaded directly by the Apple TV.
@@ -52,10 +51,10 @@ export abstract class Page {
             .then((templateSource) => {
 
                 // Substitute the data
-                const templateWithData = environment.runStringSync(templateSource, data);
+                const templateWithData = environment.renderString(templateSource, data);
                 try {
                     // Parse the XML.
-                    const xml = atv.parseXML(templateWithData.content);
+                    const xml = atv.parseXML(templateWithData);
 
                     // If we have a proxy document, we need to load the XML into that.
                     if (this.proxyDocument != null) {
@@ -131,7 +130,7 @@ export abstract class Page {
      */
     public loadPage(event?: ATVNavigateEvent, useProxyDocument = true, swap = false) {
         const loader = new TemplateLoader();
-        const env = vento({ includes: loader })
+        const env = new Environment(loader);
 
         this.registerCustomHelpers(env);
 

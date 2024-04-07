@@ -4,6 +4,7 @@ import Q from 'atv-legacy-q';
 import { HttpResponse } from "./http-service";
 import {TemplateLoader} from "./template-loader";
 import {Environment} from "nunjucks"
+import {ComponentExtension} from "./component-nunjucks";
 
 /**
  * A top-level page that can be loaded directly by the Apple TV.
@@ -131,6 +132,8 @@ export abstract class Page {
     public loadPage(event?: ATVNavigateEvent, useProxyDocument = true, swap = false) {
         const loader = new TemplateLoader();
         const env = new Environment(loader);
+        env.addExtension('component', new ComponentExtension(env));
+        console.log(env.getExtension('component'), (env.getExtension('component') as any)['run'])
 
         this.registerCustomHelpers(env);
 

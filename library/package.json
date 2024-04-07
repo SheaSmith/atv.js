@@ -1,6 +1,6 @@
 {
   "name": "atv-legacy.js",
-  "version": "0.3.0",
+  "version": "0.3.22",
   "description": "atv-legacy.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
